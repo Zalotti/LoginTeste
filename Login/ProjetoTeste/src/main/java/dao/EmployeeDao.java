@@ -3,7 +3,10 @@ package dao;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.ArrayList;
 
 import model.Employee;
 
@@ -43,11 +46,11 @@ public class EmployeeDao {
 	        return result;
 	    }
 	 
-	 public int loginEmployee(Employee employee) throws ClassNotFoundException {
+	 public boolean loginEmployee(Employee employee) throws ClassNotFoundException {
 	        String GET_USERS_SQL = "SELECT * FROM EMPLOYEE WHERE USERNAME = ?" +
 	        		                " AND PASSWORD = ?;";
 
-	        int result = 0;
+	        boolean result = false;
 
 	        Class.forName("com.mysql.jdbc.Driver");
 
@@ -62,7 +65,8 @@ public class EmployeeDao {
 	            
 	            System.out.println(preparedStatement);
 	            
-	            result = preparedStatement.executeQuery();
+	            ResultSet rs = preparedStatement.executeQuery();
+	            result = rs.next();
 
 	        } catch (SQLException e) {
 	            // process sql exception
@@ -71,9 +75,9 @@ public class EmployeeDao {
 	        return result;
 	    }
 	 
-	 public List<Employee> listarUsuarios() throws ClassNotFoundException {
+	 public List<Employee> listarUsuarios(Employee employee) throws ClassNotFoundException {
 		 
-	        List<Employee> usuarios = new ArrayList<>();
+	        List<Employee> usuarios = new ArrayList<Employee>();
 	        
 	        String sql = "SELECT * FROM EMPLOYEE WHERE USERNAME = ?" +
 	        " AND PASSWORD = ?;";
@@ -88,28 +92,27 @@ public class EmployeeDao {
 	            statement.setString(2, employee.getPassword());
 	            
 	            
-	            System.out.println(preparedStatement);
+	            System.out.println(statement);
 	            
-	            result = preparedStatement.executeQuery();
+	            ResultSet rs = statement.executeQuery();
 	            
-	            Employee employee = new Employee();
-	            employee.setId(result.getInt("id"));
-	            employee.setFirstName(result.getString("first_name"));
-	            employee.setLastName(result.getString("last_name"));
-	            employee.setUsername(result.getString("username"));
-	            employee.setPassword(result.getString("password"));
-	            employee.setAddress(result.getString("address"));
-	            employee.setContact(result.getString("contact"));
+	            employee.setId(rs.getInt("id"));
+	            employee.setFirstName(rs.getString("first_name"));
+	            employee.setLastName(rs.getString("last_name"));
+	            employee.setUsername(rs.getString("username"));
+	            employee.setPassword(rs.getString("password"));
+	            employee.setAddress(rs.getString("address"));
+	            employee.setContact(rs.getString("contact"));
 	 
 	            usuarios.add(employee);
+	            
+		        rs.close();
+		        statement.close();
 
 	        } catch (SQLException e) {
 	            // process sql exception
 	            e.printStackTrace();
-	        }
-	        result.close();
-	        statement.close();
-	        
+	        }      
 	        return usuarios;
 
 }
